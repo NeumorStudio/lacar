@@ -1,0 +1,277 @@
+---
+import { NEGOCIO, SITIO, NOMBRE_WEB } from '../../negocio.js';
+import Admin from '../../layouts/Admin.astro';
+import { ajuste } from '../../lib/datos.js';
+import { MIN_LONGITUD, haySoporte, soporteQuitado, enlaceJuanPendiente, DIAS_ENLACE } from '../../lib/acceso.js';
+import { leerOcultos } from '../../lib/secciones.js';
+import { COSTES_POR_DEFECTO } from '../../lib/importacion.js';
+import { usoFotos } from '../../lib/fotos.js';
+import { vendidosConFotos } from '../../lib/datos.js';
+import { ajustesContrato } from '../../lib/captaciones.js';
+import { PLANTILLA_SERIE } from '../../lib/contrato.js';
+const env = Astro.locals.runtime.env;
+const costes = { ...COSTES_POR_DEFECTO, ...JSON.parse((await ajuste(env.DB, 'costes')) || '{}') };
+const correo = (await ajuste(env.DB, 'correo_avisos')) || env.CORREO_DESTINO || NEGOCIO.email;
+const correoListo = !!env.RESEND_API_KEY;
+const usuario = Astro.locals.usuario?.usuario || 'juan';
+const esSoporte = usuario === 'soporte';
+const [soporte, quitado] = await Promise.all([haySoporte(env.DB), soporteQuitado(env.DB)]);
+const [enlacePendiente, ocultos] = await Promise.all([enlaceJuanPendiente(env.DB), leerOcultos(env.DB).catch(() => [])]);
+const fechaCorta = (ms) => new Date(ms).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', timeZone: 'Europe/Madrid' });
+const [uso, liberables] = await Promise.all([usoFotos(env.DB).catch(() => null), vendidosConFotos(env.DB, 180).catch(() => [])]);
+const contrato = await ajustesContrato(env.DB);
+const VERSION = typeof __BUILD__ !== 'undefined' ? __BUILD__ : 'dev';
+// datos para el editor del contrato, dentro de un <script type="application/json">: sin «<» para que nadie pueda cerrar la etiqueta
+const enScript = (x) => JSON.stringify(x).replace(/</g, '\\u003c');
+const mb = (b) => `${Math.round(b / 1e6).toLocaleString('es-ES')} MB`;
+---
+<Admin titulo="Ajustes" seccion="ajustes">
+  <h1>Ajustes</h1>
+  <a class="caja caja-enlace" href="/admin/web">
+    <span><b>Tu web a tu medida</b><small>Elige qué páginas, bloques de la portada y botones se ven en tu web.{ocultos.length > 0 && ` Ahora tienes ${ocultos.length} ${ocultos.length === 1 ? 'cosa oculta' : 'cosas ocultas'}.`}</small></span>
+    <span aria-hidden="true">›</span>
+  </a>
+  <div class="caja">
+    <h2>Avisos por correo</h2>
+    <p class="suave">Los formularios de la web te llegan a este correo{correoListo ? '' : ' (el envío de correos todavía no está activado; mientras tanto, los mensajes quedan en la pestaña Mensajes)'}.</p>
+    <form data-api="/api/admin/ajustes" data-aviso="Correo guardado">
+      <input type="hidden" name="accion" value="correo" />
+      <label class="campo"><span>Correo para los avisos</span><input type="email" name="correo" value={correo} required /></label>
+      <button class="boton" type="submit">Guardar</button>
+    </form>
+  </div>
+  <div class="caja" id="contratos">
+    <h2>Contratos de captación</h2>
+    <p class="suave">Lo que sale en el acuerdo que firma el vendedor cuando vendes su coche.</p>
+    <form data-api="/api/admin/ajustes" data-aviso="Datos del contrato guardados">
+      <input type="hidden" name="accion" value="contrato" />
+      <div class="dos">
+        <label class="campo"><span>Tu nombre o razón social</span><input type="text" name="empresa_nombre" value={contrato.empresa_nombre} required /></label>
+        <label class="campo"><span>NIF/CIF <span class="nota">(o tu DNI, si eres autónomo)</span></span><input type="text" name="empresa_nif" value={contrato.empresa_nif} style="text-transform:uppercase" /></label>
+        <label class="campo"><span>Domicilio</span><input type="text" name="empresa_domicilio" value={contrato.empresa_domicilio} /></label>
+        <label class="campo"><span>Quién firma <span class="nota">(nombre y apellidos)</span></span><input type="text" name="empresa_representante" value={contrato.empresa_representante} /></label>
+        <label class="campo"><span>Ciudad donde se firma</span><input type="text" name="ciudad" value={contrato.ciudad} /></label>
+        <label class="campo"><span>Días de exclusividad</span><input type="number" name="plazo_dias" min="1" max="365" value={contrato.plazo_dias} inputmode="numeric" /></label>
+        <label class="campo"><span>Días que vale el enlace para firmar</span><input type="number" name="dias_enlace" min="1" max="60" value={contrato.dias_enlace} inputmode="numeric" /></label>
+        <label class="campo"><span>Meses de garantía que gestionas</span><input type="number" name="garantia_meses" min="1" max="60" value={contrato.garantia_meses} inputmode="numeric" /></label>
+        <label class="campo"><span>Compensación si rompe la exclusiva</span><input type="text" name="penalizacion" maxlength="60" value={contrato.penalizacion} /></label>
+      </div>
+      <button class="boton" type="submit">Guardar</button>
+    </form>
+
+    <h3 style="margin-top:22px">Tu firma</h3>
+    <p class="suave">Se pone sola en cada contrato que mandas. Fírmala una vez con el dedo o el ratón.</p>
+    <div class="firma-ajustes" data-firma-ajustes>
+      {contrato.firma && <img src={contrato.firma} alt="Tu firma guardada" class="firma-guardada" data-firma-guardada />}
+      <div class="lienzo-firma" data-lienzo-firma hidden={!!contrato.firma}><canvas></canvas><span class="pista">Firma aquí</span></div>
+      <div class="botonera" style="margin-top:8px">
+        <button type="button" class="boton" data-guardar-firma hidden={!!contrato.firma}>Guardar firma</button>
+        <button type="button" class="boton secundario" data-repetir-firma>{contrato.firma ? 'Cambiar la firma' : 'Borrar y repetir'}</button>
+      </div>
+    </div>
+
+    <h3 style="margin-top:22px">Texto del contrato</h3>
+    <p class="suave">{contrato.plantilla_editada ? 'Es tu contrato.' : 'Es el contrato de serie (venta en exclusiva).'} Los nombres, el NIF, los precios, la garantía y la compensación salen solos de tus datos de arriba y de cada captación. Puedes cambiarlo de dos formas: subiendo tu contrato en PDF o cambiando el texto aquí mismo.</p>
+    <link rel="stylesheet" href={`/admin/editor-contrato.css?v=${VERSION}`} />
+    <div data-editor-contrato>
+      <div class="ec-pestanas" role="tablist" aria-label="Cómo cambiar el contrato">
+        <button type="button" role="tab" id="ec-tab-pdf" aria-controls="ec-panel-pdf" aria-selected="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 20h14"/></svg>
+          Subir mi contrato (PDF)
+        </button>
+        <button type="button" role="tab" id="ec-tab-texto" aria-controls="ec-panel-texto" aria-selected="false" tabindex="-1">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          Cambiar el texto aquí
+        </button>
+      </div>
+
+      <div role="tabpanel" id="ec-panel-pdf" aria-labelledby="ec-tab-pdf">
+        <div id="ec-paso-subir">
+          <label class="ec-zona" id="ec-zona" for="ec-archivo">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+            <b>Arrastra aquí tu contrato en PDF</b>
+            <span>o pulsa para elegirlo</span>
+          </label>
+          <input type="file" id="ec-archivo" accept="application/pdf,.pdf" hidden />
+          <p class="ec-pista">¿Lo tienes en Word? Ábrelo y haz Archivo → Guardar como → PDF. El PDF no sale de tu ordenador: se lee aquí mismo y solo se guarda el texto.</p>
+        </div>
+        <div id="ec-leyendo" class="ec-cargando" hidden><span class="ec-rueda" aria-hidden="true"></span><span>Leyendo el contrato…</span></div>
+        <div id="ec-error-pdf" class="ec-nota ec-rojo" role="alert" hidden></div>
+
+        <div id="ec-paso-revisar" hidden>
+          <div class="ec-resumen" id="ec-resumen"></div>
+          <ol class="ec-huecos" id="ec-lista-huecos"></ol>
+          <div class="ec-acciones">
+            <button class="boton" id="ec-pasar" type="button">Pasar al editor</button>
+            <button class="boton secundario" id="ec-otro" type="button">Subir otro</button>
+            <span class="ec-estado" id="ec-faltan"></span>
+          </div>
+        </div>
+      </div>
+
+      <div role="tabpanel" id="ec-panel-texto" aria-labelledby="ec-tab-texto" hidden>
+        <div class="ec-nota ec-azul ec-banner" id="ec-banner" hidden>
+          <span id="ec-banner-texto"></span>
+          <button class="ec-enlace" id="ec-deshacer-import" type="button">Volver al que tenía</button>
+        </div>
+
+        <div class="ec-modo" role="group" aria-label="Modo">
+          <button type="button" id="ec-modo-editar" aria-pressed="true">Editar</button>
+          <button type="button" id="ec-modo-ver" aria-pressed="false">Ver con un ejemplo</button>
+        </div>
+
+        <div id="ec-zona-editar">
+          <div class="ec-herramientas" role="toolbar" aria-label="Formato">
+            <button type="button" data-cmd="h2" title="Convierte la línea en un título de apartado"><b aria-hidden="true">T</b> Apartado</button>
+            <button type="button" data-cmd="p" title="Convierte la línea en texto normal">¶ Texto</button>
+            <button type="button" data-cmd="lista" title="Pone o quita una lista con puntos">• Lista</button>
+            <button type="button" class="ec-insertar" id="ec-insertar" aria-haspopup="menu">＋ Insertar dato</button>
+            <span class="ec-separa"></span>
+            <button type="button" data-cmd="deshacer" title="Deshacer el último cambio">↶ Deshacer</button>
+          </div>
+          <div id="ec-editor" class="ec-hoja" contenteditable="true" spellcheck="true" lang="es" role="textbox" aria-multiline="true" aria-label="Texto del contrato"></div>
+          <p class="ec-ayuda">Escribe como en Word. Lo que cambia en cada coche, como el DNI o la matrícula, se pone con «Insertar dato». Toca un dato azul para cambiarlo o quitarlo.</p>
+        </div>
+
+        <div id="ec-zona-ver" hidden>
+          <p class="ec-aviso-ejemplo">El vendedor y el coche son inventados, para ver cómo queda. Al enviar el contrato se ponen los de verdad.</p>
+          <div id="ec-vista" class="ec-hoja" aria-live="polite"></div>
+        </div>
+
+        <div class="ec-comprobacion" id="ec-comprobacion" aria-live="polite"></div>
+
+        <div class="ec-acciones">
+          <button class="boton" id="ec-guardar" type="button">Guardar el contrato</button>
+          {contrato.plantilla_editada && <button class="boton secundario" id="ec-serie" type="button">Volver al contrato de serie</button>}
+          <span class="ec-estado" id="ec-estado"></span>
+        </div>
+        {contrato.plantilla_editada && (
+          <div class="ec-confirmar" id="ec-confirmar" hidden>
+            <p>Se borra lo que has cambiado y vuelve el contrato con el que empezaste. ¿Seguro?</p>
+            <button class="boton ec-rojo-boton" id="ec-si-serie" type="button">Sí, volver</button>
+            <button class="boton secundario" id="ec-no-serie" type="button">Cancelar</button>
+          </div>
+        )}
+      </div>
+    </div>
+    <script is:inline type="application/json" data-ec-datos set:html={enScript({
+      plantilla: contrato.plantilla, editada: !!contrato.plantilla_editada, serie: PLANTILLA_SERIE,
+      empresa: { empresa_nombre: contrato.empresa_nombre, empresa_nif: contrato.empresa_nif, empresa_domicilio: contrato.empresa_domicilio, empresa_representante: contrato.empresa_representante, ciudad: contrato.ciudad, plazo_dias: String(contrato.plazo_dias ?? ''), garantia_meses: String(contrato.garantia_meses ?? ''), penalizacion: contrato.penalizacion },
+    })} />
+    <script is:inline src={`/admin/editor-contrato.js?v=${VERSION}`} defer></script>
+    <p class="suave" style="margin-top:12px">Los contratos ya enviados no cambian: cada uno guarda el texto con el que se mandó.</p>
+  </div>
+
+  <div class="caja">
+    <h2>Gastos por defecto de la calculadora</h2>
+    <p class="suave">Lo que sueles pagar. Se usan en cada cálculo nuevo y puedes ajustarlos en cada caso.</p>
+    <form data-api="/api/admin/ajustes" data-aviso="Gastos guardados">
+      <input type="hidden" name="accion" value="costes" />
+      <div class="tres">
+        <label class="campo"><span>Transporte desde fuera (€)</span><input type="number" name="transporte" min="0" value={costes.transporte} /></label>
+        <label class="campo"><span>Gestoría de importación (€)</span><input type="number" name="gestoria_import" min="0" value={costes.gestoria_import} /></label>
+        <label class="campo"><span>ITV y homologación (€)</span><input type="number" name="itv_homologacion" min="0" value={costes.itv_homologacion} /></label>
+        <label class="campo"><span>Placas y tasas de Tráfico (€)</span><input type="number" name="placas_tasas" min="0" value={costes.placas_tasas} /></label>
+        <label class="campo"><span>Cambio de nombre, tasa (€)</span><input type="number" name="cambio_nombre" min="0" value={costes.cambio_nombre} /></label>
+        <label class="campo"><span>Gestoría nacional (€)</span><input type="number" name="gestoria_nacional" min="0" value={costes.gestoria_nacional} /></label>
+      </div>
+      <button class="boton" type="submit">Guardar</button>
+    </form>
+  </div>
+  <div class="caja" id="avisos" data-push-caja>
+    <h2>Avisos en el móvil</h2>
+    <p class="suave">Instala el panel en el móvil y recibe un aviso cada vez que llegue un mensaje desde la web, aunque tengas el panel cerrado.</p>
+    <div class="botonera">
+      <button class="boton" type="button" data-push-activar>Activar avisos en este móvil</button>
+      <button class="boton secundario" type="button" data-push-quitar hidden>Quitar avisos en este móvil</button>
+      <button class="boton secundario" type="button" data-push-probar hidden>Enviar un aviso de prueba</button>
+    </div>
+    <p class="suave" data-push-estado style="margin-top:10px"></p>
+    <p class="suave" data-instalar-ayuda hidden>Para instalarlo: en Android, menú de Chrome → «Añadir a pantalla de inicio»; en iPhone, Safari → Compartir → «Añadir a pantalla de inicio» (los avisos en iPhone solo funcionan con el panel instalado).</p>
+  </div>
+  <div class="caja">
+    <h2>Cambiar contraseña</h2>
+    <p class="suave">Has entrado como <b>{usuario === 'soporte' ? 'Soporte' : NEGOCIO.duenoNombre}</b>. Cambias tu propia contraseña.</p>
+    <form data-api="/api/admin/ajustes" data-aviso="Contraseña cambiada" data-limpiar>
+      <input type="hidden" name="accion" value="clave" />
+      <label class="campo"><span>Contraseña actual</span><input type="password" name="actual" required autocomplete="current-password" /></label>
+      <label class="campo"><span>Nueva contraseña</span><input type="password" name="clave" minlength={MIN_LONGITUD} required autocomplete="new-password" /></label>
+      <label class="campo"><span>Repite la nueva</span><input type="password" name="clave2" minlength={MIN_LONGITUD} required autocomplete="new-password" /></label>
+      <button class="boton" type="submit">Cambiar</button>
+    </form>
+  </div>
+  {esSoporte ? (
+    <div class="caja">
+      <h2>Acceso de soporte</h2>
+      <p class="suave">Has entrado con la contraseña de soporte de NeumorStudio (la cambias arriba, en «Cambiar contraseña»). El dueño ve en sus Ajustes que tenéis acceso y puede quitarlo; esta parte y el enlace de abajo solo los ves tú.</p>
+    </div>
+  ) : (
+    <div class="caja" id="acceso-neumorstudio">
+      <h2>Acceso de NeumorStudio</h2>
+      {soporte ? (
+        <>
+          <p class="suave">NeumorStudio, que te lleva la web, tiene su propia contraseña para entrar a revisar o arreglar algo si hace falta. No conoce la tuya ni puede cambiarla.</p>
+          <button class="boton secundario" type="button" data-api-boton="/api/admin/ajustes" data-cuerpo='{"accion":"soporte_quitar"}' data-confirmar="¿Quitar el acceso de NeumorStudio? No podrán entrar a ayudarte hasta que lo vuelvas a permitir." data-aviso="Acceso de NeumorStudio quitado" data-recargar>Quitar el acceso de NeumorStudio</button>
+        </>
+      ) : quitado ? (
+        <>
+          <p class="suave">Has quitado el acceso de NeumorStudio: no pueden entrar en tu panel. Si algún día necesitas que te ayuden desde dentro, vuelve a permitirlo.</p>
+          <button class="boton secundario" type="button" data-api-boton="/api/admin/ajustes" data-cuerpo='{"accion":"soporte_permitir"}' data-aviso="Acceso de NeumorStudio permitido" data-recargar>Volver a permitirlo</button>
+        </>
+      ) : (
+        <p class="suave">Ahora mismo NeumorStudio no tiene acceso a tu panel.</p>
+      )}
+    </div>
+  )}
+  {esSoporte && (
+    <div class="caja" id="enlace-juan">
+      <h2>Contraseña del dueño, sin pasársela</h2>
+      <p class="suave">Crea un enlace para que el dueño ponga su propia contraseña desde el móvil. Sirve una sola vez y caduca en {DIAS_ENLACE} días. Cuando lo use, se cierran las sesiones abiertas (también esta): se vuelve a entrar con la contraseña de cada uno.</p>
+      {enlacePendiente && <p class="suave" data-enlace-pendiente>Hay un enlace sin usar hasta el {fechaCorta(enlacePendiente)}. Si creas otro, el anterior deja de valer.</p>}
+      <button class="boton" type="button" data-enlace-juan data-sitio={SITIO} data-wa={NEGOCIO.whatsapp}>{enlacePendiente ? 'Crear un enlace nuevo' : 'Crear enlace para el dueño'}</button>
+      <div data-enlace-juan-listo hidden style="margin-top:14px">
+        <label class="campo"><span>Enlace para el dueño</span><input type="text" readonly data-enlace-juan-url /></label>
+        <div class="botonera">
+          <a class="boton" data-enlace-juan-wa target="_blank" rel="noopener">Enviar por WhatsApp al dueño</a>
+          <button class="boton secundario" type="button" data-enlace-juan-copiar>Copiar enlace</button>
+        </div>
+      </div>
+    </div>
+  )}
+  <div class="caja" id="copia">
+    <h2>Copia de seguridad</h2>
+    <p class="suave">Descarga en un archivo todos los coches, clientes, mensajes, tareas y ventas. Guárdalo en el ordenador o en tu correo de vez en cuando (una vez al mes, por ejemplo). Las fotos no van dentro: siguen en la web.</p>
+    <a class="boton secundario" href="/api/admin/exportar" download>Descargar copia de seguridad</a>
+  </div>
+  {uso && (
+    <div class="caja" id="espacio">
+      <h2>Espacio para fotos</h2>
+      <p class="suave" style="margin:0">{uso.n} fotos · {mb(uso.bytes)} de {mb(uso.limite)} usados ({uso.porcentaje} %).</p>
+      <div class={`uso ${uso.porcentaje >= 95 ? 'lleno' : uso.porcentaje >= 80 ? 'alto' : ''}`} role="img" aria-label={`${uso.porcentaje} % usado`}><span style={`width:${Math.max(1, uso.porcentaje)}%`}></span></div>
+      {liberables.length > 0 ? (
+        <>
+          <p class="suave">Hay {liberables.length} {liberables.length === 1 ? 'coche vendido' : 'coches vendidos'} hace más de 6 meses con todas sus fotos. Puedes dejarles solo la portada (la que sale en «Últimas entregas») y liberar espacio. Las demás fotos se borran y no se pueden recuperar.</p>
+          <button type="button" class="boton secundario" data-liberar-espacio>Liberar espacio</button>
+        </>
+      ) : <p class="suave">Cuando se acerque al límite, aquí podrás liberar el espacio de los coches vendidos hace tiempo.</p>}
+    </div>
+  )}
+  <div class="caja">
+    <h2>Imágenes de la web</h2>
+    <p class="suave">La foto grande de la portada y las de las secciones (encargo, vende tu coche, servicios) se pueden cambiar.</p>
+    <a class="boton secundario" href="/admin/imagenes">Cambiar las imágenes</a>
+  </div>
+  <div class="caja">
+    <h2>Cómo funciona</h2>
+    <p>• <b>Añadir vehículo</b>: rellena los 5 pasos y publica. Sale en la web al momento. Si se te cierra la página a medias, al volver te ofrece recuperar lo que habías escrito.</p>
+    <p>• <b>Cambiar algo de un coche</b>: en Inventario pulsa «Editar», cambia lo que sea (el precio, una foto…) y pulsa <b>Guardar cambios</b>, que está siempre abajo.</p>
+    <p>• <b>Uno parecido</b>: en la ficha de un coche, «Duplicar» abre el alta con sus datos ya puestos (sin fotos ni matrícula).</p>
+    <p>• <b>Vender un coche</b>: en Inventario (o en su ficha), cambia su estado a <b>Vendido</b> y pon el precio de venta. Se apunta en Ventas y la web lo marca con el sello VENDIDO y lo pasa a «Últimas entregas». No hace falta eliminarlo.</p>
+    <p>• <b>Ocultar un coche</b>: el estado <b>Oculto</b> lo quita de la web sin borrarlo (para prepararlo con calma o retirarlo un tiempo).</p>
+    <p>• <b>Oferta</b>: en el paso Precio, activa «En oferta» y pon el precio rebajado.</p>
+    <p>• <b>Orden de la web</b>: primero salen los disponibles, luego los de «Próximamente» y los reservados. Dentro de cada grupo, los últimos que añades salen arriba; «Poner el primero en el listado» sube uno.</p>
+    <p>• <b>Mensajes</b>: cada formulario de la web queda guardado ahí{correoListo ? ', y además te llega por correo' : ''}. Con los avisos del móvil activados te enteras al momento. El que escribe pasa solo a <b>Clientes</b>.</p>
+    <p>• <b>Tareas</b>: apunta llamadas y recordatorios; en Inicio ves lo de hoy.</p>
+    <p>• <b>Calculadora</b>: pega un anuncio y te dice cuánto cuesta el coche puesto en España y qué margen deja.</p>
+  </div>
+</Admin>
