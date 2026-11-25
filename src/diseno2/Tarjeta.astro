@@ -16,11 +16,13 @@ const cuota = precio > 0 && !vendido ? cuotaMensual(financiado) : null;
 const etiqueta = c.estado === 'Disponible' ? null : c.estado;
 const combustible = motor(c.combustible, true);
 const { nombre, version } = partesTitulo(c);
+// mismo nombre que la foto grande de la ficha: al abrir el coche, la foto «vuela» de la tarjeta a la ficha
+const vt = `view-transition-name: coche-${String(c.slug).replace(/[^a-z0-9-]/gi, '')}`;
 const cambio = (c.cambio || '').replace('Automático', 'Auto.');
 ---
 <a class:list={['tarjeta', { vendido }]} href={urlCoche(c)} data-coche={c.slug} data-estado={c.estado} data-precio={precio} data-marca={c.marca} data-combustible={c.combustible} data-cambio={c.cambio} data-anio={c.anio} data-km={c.km}>
   <div class="tarjeta-foto">
-    <img src={foto} alt={tituloLimpio(c)} width="800" height="600" loading={prioridad ? 'eager' : 'lazy'} decoding="async" fetchpriority={prioridad ? 'high' : undefined} />
+    <img src={foto} alt={tituloLimpio(c)} width="800" height="450" style={vt} loading={prioridad ? 'eager' : 'lazy'} decoding="async" fetchpriority={prioridad ? 'high' : undefined} />
     {etiqueta && !vendido && <span class:list={['etiqueta', { pronto: c.estado === 'Próximamente', reservado: c.estado === 'Reservado' }]}>{etiqueta}</span>}
     {enOferta && !vendido && <span class="etiqueta oferta">Oferta</span>}
     {vendido && <div class="sello" aria-label="Vendido"><span>VENDIDO</span></div>}

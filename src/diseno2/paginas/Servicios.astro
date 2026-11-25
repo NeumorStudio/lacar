@@ -18,7 +18,7 @@ import { NEGOCIO } from '../../negocio.js';
       <div class="servicios revela">
         {SERVICIOS.map((s) => (
           <div class="servicio">
-            <div class="foto"><img src={s.foto} alt="" width="800" height="500" loading="lazy" /></div>
+            <div class="icono-servicio" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d={s.icono} /></svg></div>
             <h3>{s.titulo}</h3>
             <p>{s.texto}</p>
             {s.enlace && <p><a class="enlace-flecha" href={s.enlace}>Más información</a></p>}

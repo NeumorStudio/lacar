@@ -69,7 +69,7 @@ const jsonLd = {
     <div class="ficha-principal">
       <div class="galeria" data-galeria>
         <div class="galeria-principal">
-          <img src={fotos[0]} alt={`${limpio}, foto 1`} width="1200" height="900" fetchpriority="high" decoding="async" data-galeria-principal />
+          <img src={fotos[0]} alt={`${limpio}, foto 1`} width="1200" height="675" style={`view-transition-name: coche-${String(c.slug).replace(/[^a-z0-9-]/gi, "")}`} fetchpriority="high" decoding="async" data-galeria-principal />
           {vendido && <div class="sello" aria-label="Vendido"><span>VENDIDO</span></div>}
           {fotos.length > 1 && <>
             <button type="button" class="galeria-flecha ant" aria-label="Foto anterior" data-galeria-paso="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m15 5-7 7 7 7"/></svg></button>
@@ -79,7 +79,7 @@ const jsonLd = {
         </div>
         {fotos.length > 1 && (
           <div class="galeria-miniaturas" role="tablist" aria-label="Fotos del coche">
-            {fotos.map((f, i) => <button type="button" role="tab" aria-current={i === 0 ? 'true' : 'false'} data-foto={f} aria-label={`Foto ${i + 1}`}><img src={fotoMini(f)} alt="" width="184" height="138" loading="lazy" decoding="async" /></button>)}
+            {fotos.map((f, i) => <button type="button" role="tab" aria-current={i === 0 ? 'true' : 'false'} data-foto={f} aria-label={`Foto ${i + 1}`}><img src={fotoMini(f)} alt="" width="184" height="104" loading="lazy" decoding="async" /></button>)}
           </div>
         )}
       </div>

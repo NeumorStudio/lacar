@@ -265,4 +265,33 @@
   } else {
     revela.forEach(function (el) { el.classList.add('visto'); });
   }
+
+  // ---------------------------------------------------------------- vitrina de la portada: los destacados pasan solos
+  var vitrina = $('[data-vitrina]');
+  if (vitrina) {
+    var coches = $$('.vitrina-coche', vitrina), datos = $$('.vitrina-datos', vitrina), puntos = $$('[data-vitrina-ir]', vitrina);
+    var MS = 5600, actual = 0, reloj = null, quieta = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    vitrina.style.setProperty('--vitrina-ms', MS + 'ms');
+    if (quieta) vitrina.setAttribute('data-quieta', '');
+    var ir = function (n) {
+      actual = (n + coches.length) % coches.length;
+      coches.forEach(function (c, i) {
+        var si = i === actual;
+        c.toggleAttribute('data-activo', si);
+        if (si) { c.removeAttribute('aria-hidden'); c.removeAttribute('tabindex'); } else { c.setAttribute('aria-hidden', 'true'); c.setAttribute('tabindex', '-1'); }
+      });
+      datos.forEach(function (d, i) { d.toggleAttribute('data-activo', i === actual); });
+      puntos.forEach(function (p, i) {
+        p.setAttribute('aria-current', i === actual ? 'true' : 'false');
+        var barra = p.querySelector('i'); if (barra) { barra.style.display = 'none'; void barra.offsetWidth; barra.style.display = ''; } // reinicia la barra
+      });
+    };
+    var siguiente = function () { if (!vitrina.hasAttribute('data-pausa') && !document.hidden) ir(actual + 1); };
+    var arrancar = function () { clearInterval(reloj); if (!quieta && coches.length > 1) reloj = setInterval(siguiente, MS); };
+    puntos.forEach(function (p) { p.addEventListener('click', function () { ir(+p.getAttribute('data-vitrina-ir')); arrancar(); }); });
+    var pausar = function () { vitrina.setAttribute('data-pausa', ''); }, seguir = function () { vitrina.removeAttribute('data-pausa'); ir(actual); arrancar(); };
+    vitrina.addEventListener('mouseenter', pausar); vitrina.addEventListener('mouseleave', seguir);
+    vitrina.addEventListener('focusin', pausar); vitrina.addEventListener('focusout', seguir);
+    arrancar();
+  }
 })();

@@ -86,7 +86,7 @@ const ldSeguro = (o) => JSON.stringify(o).replace(/</g, '\\u003c');
   <body class={claseCuerpo}>
     <header class="cabecera">
       <div class="envoltorio">
-        <a class="logo" href="/" aria-label={`${NEGOCIO.nombre}, inicio`}><img src={LOGO} alt="" width="46" height="46" /><span class="marca">{MARCA_1} <b>{MARCA_2}</b></span></a>
+        <a class="logo" href="/" aria-label={`${NEGOCIO.nombre}, inicio`}><img src="/img/marca/escudo.webp" alt="" width="49" height="45" /><span class="marca">{MARCA_1} <b>{MARCA_2}</b></span></a>
         <nav class="nav" aria-label="Secciones">
           {enlaces.map(([id, href, texto]) => <a href={href} aria-current={id === pagina ? 'page' : undefined}>{texto}</a>)}
         </nav>
@@ -115,7 +115,7 @@ const ldSeguro = (o) => JSON.stringify(o).replace(/</g, '\\u003c');
       <div class="envoltorio">
         <div class="columnas">
           <div>
-            <a class="logo logo-pie" href="/" aria-label={`${NEGOCIO.nombre}, inicio`}><img src={LOGO} alt="" width="88" height="88" /><span class="marca">{MARCA_1} <b>{MARCA_2}</b></span></a>
+            <a class="logo logo-pie" href="/" aria-label={`${NEGOCIO.nombre}, inicio`}><img src="/img/marca/escudo.webp" alt="" width="97" height="89" /><span class="marca">{MARCA_1} <b>{MARCA_2}</b></span></a>
             <p>{NEGOCIO.nombre}: gestión de venta de vehículos con confianza, transparencia y acompañamiento.</p>
           </div>
           <div>

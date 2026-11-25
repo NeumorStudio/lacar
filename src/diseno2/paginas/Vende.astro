@@ -10,12 +10,12 @@ const preguntas = VENDE.preguntas;
 <Marco pagina="vende" title={`Vende tu coche: tasación gratis | ${NEGOCIO.nombre} ${NEGOCIO.localidad}`} description="Tasa tu coche gratis y consigue la mejor oferta. Valoración en menos de 24 horas laborables y nos encargamos de todo el proceso.">
   <section class="seccion" style="padding-bottom:0">
     <div class="envoltorio bloque">
-      <img src="/img-web/llaves.webp" alt="Entrega de las llaves de un coche" width="1280" height="720" fetchpriority="high" />
       <div class="texto">
         <h1 style="font-size:clamp(2.4rem,6vw,4rem)">{VENDE.h1}</h1>
         <p class="medido">{VENDE.texto}</p>
         <div><a class="btn grande" href="#tasar">Pedir tasación</a></div>
       </div>
+      <ol class="tasacion-pasos" aria-label="Cómo funciona la tasación"><li><b>Datos y fotos</b><span>Marca, modelo, kilómetros y unas fotos desde el móvil.</span></li><li><b>Valoración en 24 h</b><span>Te damos una cifra clara, sin compromiso.</span></li><li><b>Pago y papeles</b><span>Si te encaja, nos encargamos de la transferencia y el cambio de nombre.</span></li></ol>
     </div>
   </section>
   <section class="seccion blanca" id="tasar">

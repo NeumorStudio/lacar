@@ -8,7 +8,10 @@ import { WHATSAPP, TELEFONO, TELEFONO_BONITO, DIRECCION, MAPA, HORARIO, EMAIL } 
 import { PORTADA, SERVICIOS, PREGUNTAS } from '../contenido.js';
 import { motor } from '../../lib/nombres.js';
 import { notaCuotas, TIN, TAE, porcentaje, PLAZO_POR_DEFECTO, IMPORTE_POR_DEFECTO } from '../finanzas.js';
-import { eurosMiles } from '../../lib/formato.js';
+import { eurosMiles, kmsMiles as kms, precioFinal, tieneFotos } from '../../lib/formato.js';
+import { fotoUrl, urlCoche } from '../../lib/plantillas.js';
+import { partesTitulo, tituloLimpio } from '../../lib/nombres.js';
+import { NEGOCIO } from '../../negocio.js';
 import { NOTA_PRIVACIDAD } from '../../lib/legal.js';
 interface Props { coches: any[] }
 const { coches } = Astro.props;
@@ -20,21 +23,56 @@ const combustibles = [...new Set(enVenta.map((c) => c.combustible).filter(Boolea
 const P = PORTADA;
 // con pocos coches, el botón no presume de cifra
 const botonStock = enVenta.length > 3 ? `Ver los ${enVenta.length} coches en stock` : 'Ver stock';
+// la portada enseña los coches de verdad (no una foto de recurso): hasta 5 destacados con foto
+const vitrina = destacados.filter(tieneFotos).slice(0, 5);
+// lo que se revisa antes de entregar un coche (tarjeta de la sección «propuesta»)
+const REVISION = ['Mecánica y motor', 'Frenos y neumáticos', 'Electrónica y diagnosis', 'Carrocería e interior', 'Documentación e historial'];
 ---
 <Marco pagina="inicio" claseCuerpo="con-portada" title={P.title} description={P.description}>
-  <section class="hero">
-    <div class="hero-foto"><img src="/img-web/hero.webp" alt="" width="1280" height="720" fetchpriority="high" decoding="async" /></div>
-    <div class="envoltorio">
-      <span class="antetitulo entra">{P.antetitulo}</span>
-      <h1 class="entra">{P.h1}</h1>
-      <p class="entra">{P.entradilla}</p>
-      <div class="hero-acciones entra">
-        <a class="btn grande" href="/stock">{botonStock}</a>
-        <a class="btn grande contorno" href="/custom-order">Encargo a medida</a>
+  <section class="hero showroom">
+    <div class="hero-haz" aria-hidden="true"></div>
+    <div class="envoltorio hero-rejilla">
+      <div class="hero-texto">
+        <span class="antetitulo entra">{P.antetitulo}</span>
+        <h1 class="entra">{P.h1}</h1>
+        <p class="entra">{P.entradilla}</p>
+        <div class="hero-acciones entra">
+          <a class="btn grande" href="/stock">{botonStock}</a>
+          <a class="btn grande contorno" href="/custom-order">Encargo a medida</a>
+        </div>
+        <div class="hero-cifras entra">
+          {P.cifras.map(([grande, pequeno]) => <div><b>{grande}</b><small>{pequeno}</small></div>)}
+        </div>
       </div>
-      <div class="hero-cifras entra">
-        {P.cifras.map(([grande, pequeno]) => <div><b>{grande}</b><small>{pequeno}</small></div>)}
-      </div>
+      {vitrina.length > 0 && (
+        <div class="vitrina entra" data-vitrina aria-roledescription="carrusel" aria-label="Coches destacados">
+          <div class="vitrina-escena">
+            {vitrina.map((c, i) => (
+              <a class="vitrina-coche" href={urlCoche(c)} data-activo={i === 0 ? '' : undefined} aria-hidden={i === 0 ? undefined : 'true'} tabindex={i === 0 ? undefined : -1}>
+                <img src={fotoUrl(c.fotos[0])} alt={tituloLimpio(c)} width="939" height="518" fetchpriority={i === 0 ? 'high' : undefined} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+              </a>
+            ))}
+            <div class="vitrina-reflejo" aria-hidden="true"></div>
+          </div>
+          <div class="vitrina-placa">
+            {vitrina.map((c, i) => {
+              const { nombre } = partesTitulo(c);
+              const pr = precioFinal(c);
+              return (
+                <div class="vitrina-datos" data-activo={i === 0 ? '' : undefined}>
+                  <div><b>{nombre}</b><span>{[c.anio, c.km != null && kms(c.km), motor(c.combustible, true)].filter(Boolean).join(' · ')}</span></div>
+                  <strong>{pr > 0 ? eurosMiles(pr) : 'Consultar'}</strong>
+                </div>
+              );
+            })}
+          </div>
+          {vitrina.length > 1 && (
+            <div class="vitrina-puntos">
+              {vitrina.map((c, i) => <button type="button" aria-label={`Ver ${tituloLimpio(c)}`} aria-current={i === 0 ? 'true' : 'false'} data-vitrina-ir={i}><i></i></button>)}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   </section>
 
@@ -81,7 +119,14 @@ const botonStock = enVenta.length > 3 ? `Ver los ${enVenta.length} coches en sto
   <section data-editor-section="propuesta" class="seccion">
     <div class="envoltorio">
       <div class="bloque">
-        <div class="foto revela"><img src="/img-web/llaves.webp" alt="Entrega de las llaves de un coche" width="1280" height="720" loading="lazy" /></div>
+        <div class="informe revela" aria-label="Revisión antes de la entrega">
+          <div class="informe-cabeza"><img src="/img/marca/escudo.webp" alt="" width="58" height="53" loading="lazy" /><div><small>Informe de entrega</small><b>Revisión antes de entregar el coche</b></div></div>
+          <ul>
+            {REVISION.map((r) => <li><span>{r}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path class="trazo" d="m5 12.5 4.5 4.5L19 7.5" /></svg></li>)}
+          </ul>
+          <div class="informe-barra"><i></i></div>
+          <p class="informe-pie"><span>Estado</span><b>Listo para entregar</b></p>
+        </div>
         <div class="texto revela">
           <span class="antetitulo">{P.propuesta.antetitulo}</span>
           <h2>{P.propuesta.titulo}</h2>
@@ -104,7 +149,7 @@ const botonStock = enVenta.length > 3 ? `Ver los ${enVenta.length} coches en sto
       <div class="servicios revela">
         {SERVICIOS.map((s) => (
           <div class="servicio">
-            <div class="foto"><img src={s.foto} alt="" width="800" height="500" loading="lazy" /></div>
+            <div class="icono-servicio" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d={s.icono} /></svg></div>
             <h3>{s.enlace ? <a href={s.enlace} style="color:inherit;text-decoration:none">{s.titulo}</a> : s.titulo}</h3>
             <p>{s.texto}</p>
           </div>
@@ -134,7 +179,12 @@ const botonStock = enVenta.length > 3 ? `Ver los ${enVenta.length} coches en sto
   </section>
 
   <section data-editor-section="importacion" class="llamada">
-    <div class="fondo"><img src="/img-web/importacion.webp" alt="" width="1280" height="720" loading="lazy" /></div>
+    <svg class="ruta" viewBox="0 0 600 360" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+      <path class="ruta-linea" d="M520 60 C 430 90, 400 160, 330 190 S 190 240, 120 300" />
+      <path class="ruta-linea" d="M560 150 C 480 170, 420 200, 330 190" />
+      <g class="ruta-puntos"><circle cx="520" cy="60" r="4" /><circle cx="560" cy="150" r="4" /><circle cx="330" cy="190" r="3" /><circle class="destino" cx="120" cy="300" r="6" /></g>
+      <text x="530" y="52">Alemania</text><text x="566" y="168" text-anchor="end">Bélgica</text><text x="134" y="318">{NEGOCIO.localidad}</text>
+    </svg>
     <div class="envoltorio revela">
       <span class="antetitulo">{P.importacion.antetitulo}</span>
       <h2>{P.importacion.titulo}</h2>
@@ -151,7 +201,16 @@ const botonStock = enVenta.length > 3 ? `Ver los ${enVenta.length} coches en sto
         {P.nosotros.parrafos.map((t, i) => <p style={i === 0 ? 'margin-top:20px' : undefined}>{t}</p>)}
         <a class="btn contorno" href="/contact">Conócenos mejor</a>
       </div>
-      <img class="revela" src="/img-web/nosotros.webp" alt="" width="1280" height="720" loading="lazy" />
+      <div class="placa-concesionario revela">
+        <img src="/img/marca/escudo.webp" alt={NEGOCIO.nombre} width="194" height="178" loading="lazy" />
+        <p class="lema">{NEGOCIO.lema}</p>
+        <dl>
+          <div><dt>Dónde</dt><dd><a href={MAPA} target="_blank" rel="noopener">{DIRECCION}</a></dd></div>
+          <div><dt>Horario</dt><dd>{HORARIO}</dd></div>
+          <div><dt>Teléfono</dt><dd><a href={`tel:${TELEFONO}`}>{TELEFONO_BONITO}</a></dd></div>
+        </dl>
+        <a class="btn contorno" href={MAPA} target="_blank" rel="noopener">Cómo llegar</a>
+      </div>
     </div>
   </section>
 

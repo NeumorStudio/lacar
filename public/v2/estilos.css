@@ -1,4 +1,7 @@
 /* Inter (variable, alojada en la propia web: sin Google Fonts, que manda la IP del visitante a Google). Licencia OFL en /fuentes. */
+/* Archivo (variable en peso y anchura) para los titulares: ancha y firme, como el rótulo cromado del escudo. Licencia OFL en /fuentes. */
+@font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; src: url(/fuentes/archivo-latin-wdth.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; src: url(/fuentes/archivo-latin-ext-wdth.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
@@ -19,17 +22,19 @@
    del logotipo, rojo solo para ofertas y sellos; ordenado como un concesionario: buscador y stock arriba, ficha con
    galería, financiación, vende tu coche, encargo, servicios y contacto. Tipografía: Inter. Todo pensado desde el móvil. */
 :root {
-  --fondo: #0a0a0c;
-  --superficie: #121215;
-  --superficie-2: #191920;
-  --linea: #26262e;
-  --linea-fuerte: #34343e;
-  --texto-claro: #f4f4f6;
-  --suave: #a3a3ad;
-  --tenue: #8b8b95;
-  --azul: #0a74da;
-  --azul-vivo: #0b63bd;
-  --azul-claro: #63b3ff;
+  --fondo: #07090d;
+  --superficie: #0e121a;
+  --superficie-2: #141a24;
+  --linea: #1f2733;
+  --linea-fuerte: #2e3949;
+  --texto-claro: #eef2f7;
+  --suave: #9aa6b6;
+  --tenue: #7f8b9c;
+  --azul: #2b7de9;
+  --azul-vivo: #1f69cf;
+  --azul-claro: #8fd0ff;
+  --cromo: #c9d1dc;
+  --titular: 'Archivo', 'Inter', system-ui, sans-serif;
   --rojo: #ef4444;
   --verde-wa: #22c55e;
   --ancho: 1200px;
@@ -455,3 +460,126 @@ dialog.legal .cerrar { position: sticky; top: 0; float: right; }
 .lista-simple li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 12px; height: 6px; border-left: 2px solid var(--azul-claro); border-bottom: 2px solid var(--azul-claro); transform: rotate(-45deg); }
 .bloque .hero-acciones, .nosotros .hero-acciones { justify-content: flex-start; }
 .pie .logo, .pie .logo:hover { color: #fff; }
+
+/* ============================================================
+   PROPUESTA V2 (nov 2026): azul acero del escudo, titulares en Archivo ancha,
+   coches recortados sin texto, vitrina de showroom y transiciones de concesionario.
+   ============================================================ */
+body { background: radial-gradient(1200px 600px at 85% -10%, rgba(43,125,233,0.07), transparent 60%), var(--fondo); }
+h1, h2, h3, .logo .marca, .precio, .cuota-grande strong, .hero-cifras b, .vitrina-datos strong { font-family: var(--titular); }
+h1 { font-weight: 640; font-stretch: 112%; letter-spacing: -0.025em; }
+h2 { font-weight: 560; font-stretch: 108%; letter-spacing: -0.02em; }
+h3 { font-weight: 600; font-stretch: 104%; letter-spacing: -0.01em; }
+.antetitulo { color: var(--azul-claro); display: inline-flex; align-items: center; gap: 10px; }
+.antetitulo::before { content: ''; width: 22px; height: 1px; background: currentColor; opacity: 0.7; }
+.btn:not(.contorno):not(.claro):not(.wa) { background: linear-gradient(180deg, #3b8cf2, var(--azul-vivo)); border-color: #2f7fe6; box-shadow: 0 6px 22px -8px rgba(43,125,233,0.7), inset 0 1px 0 rgba(255,255,255,0.18); }
+.btn:not(.contorno):not(.claro):not(.wa):hover { box-shadow: 0 10px 30px -8px rgba(43,125,233,0.9), inset 0 1px 0 rgba(255,255,255,0.22); transform: translateY(-1px); }
+
+/* logo: escudo sin fondo negro ni círculo */
+.logo img { height: 44px; width: auto; border-radius: 0; filter: drop-shadow(0 2px 10px rgba(43,125,233,0.35)); }
+.logo .marca { text-transform: uppercase; font-weight: 700; font-stretch: 106%; letter-spacing: 0.04em; font-size: 0.98rem; }
+.nav a, .cabecera .tel { white-space: nowrap; }
+@media (max-width: 1440px) { .nav a { padding: 10px 9px; letter-spacing: 0.1em; } }
+.logo .marca b { color: var(--cromo); font-weight: 500; }
+
+/* portada: showroom */
+.hero.showroom { background: radial-gradient(900px 520px at 72% 62%, rgba(43,125,233,0.22), transparent 65%), radial-gradient(700px 300px at 70% 100%, rgba(143,208,255,0.10), transparent 70%), linear-gradient(180deg, #05070b, var(--fondo)); min-height: min(100svh, 920px); }
+.hero-haz { position: absolute; inset: -20% -10% auto auto; width: 70%; height: 140%; background: conic-gradient(from 200deg at 70% 0%, transparent 0deg, rgba(143,208,255,0.10) 12deg, transparent 30deg); filter: blur(8px); animation: haz 9s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes haz { from { transform: rotate(-4deg); opacity: 0.6; } to { transform: rotate(4deg); opacity: 1; } }
+.hero.showroom .envoltorio.hero-rejilla { display: grid; gap: 40px; padding: 120px 0 56px; align-items: center; text-align: left; justify-items: stretch; }
+.hero-texto { display: flex; flex-direction: column; gap: 22px; align-items: flex-start; }
+.hero.showroom h1 { max-width: 14ch; background: linear-gradient(180deg, #fff 30%, var(--cromo) 75%, #8d99a8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero.showroom .hero-acciones { justify-content: flex-start; }
+.hero.showroom .hero-cifras { margin-top: 6px; }
+.hero.showroom .hero-cifras > div { border-left: 1px solid var(--linea-fuerte); padding-left: 14px; }
+@media (min-width: 980px) { .hero.showroom .envoltorio.hero-rejilla { grid-template-columns: 0.9fr 1.1fr; gap: 56px; } }
+
+.vitrina { position: relative; display: grid; gap: 14px; animation-delay: 0.3s !important; }
+.vitrina-escena { position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #0b0f16; box-shadow: 0 40px 80px -30px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.06); }
+.vitrina-coche { position: absolute; inset: 0; opacity: 0; transform: scale(1.04) translateX(2%); transition: opacity 0.9s var(--suave-anim), transform 1.4s var(--suave-anim); pointer-events: none; }
+.vitrina-coche[data-activo] { opacity: 1; transform: none; pointer-events: auto; }
+.vitrina-coche img { width: 100%; height: 100%; object-fit: cover; }
+.vitrina-coche::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.16) 48%, transparent 60%); transform: translateX(-120%); }
+.vitrina-coche[data-activo]::after { animation: barrido 1.6s 0.4s var(--suave-anim) both; }
+@keyframes barrido { to { transform: translateX(120%); } }
+.vitrina-reflejo { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 30%, transparent 70%, rgba(7,9,13,0.55)); }
+.vitrina-placa { position: relative; min-height: 64px; }
+.vitrina-datos { position: absolute; inset: 0 0 auto 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 18px; border-radius: 10px; background: rgba(20,26,36,0.72); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); opacity: 0; transform: translateY(8px); transition: opacity 0.6s var(--suave-anim), transform 0.6s var(--suave-anim); pointer-events: none; }
+.vitrina-datos[data-activo] { opacity: 1; transform: none; pointer-events: auto; }
+.vitrina-datos b { display: block; font-weight: 600; }
+.vitrina-datos span { font-size: 0.85rem; color: var(--suave); }
+.vitrina-datos strong { font-size: 1.35rem; font-weight: 600; font-stretch: 110%; white-space: nowrap; }
+.vitrina-puntos { display: flex; gap: 8px; }
+.vitrina-puntos button { flex: 1; height: 22px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; align-items: center; }
+.vitrina-puntos i { display: block; height: 2px; background: var(--linea-fuerte); position: relative; overflow: hidden; border-radius: 2px; }
+.vitrina-puntos i::after { content: ''; position: absolute; inset: 0; background: var(--azul-claro); transform: scaleX(0); transform-origin: left; }
+.vitrina-puntos button[aria-current="true"] i::after { animation: cuenta var(--vitrina-ms, 5600ms) linear forwards; }
+.vitrina[data-pausa] .vitrina-puntos button[aria-current="true"] i::after { animation-play-state: paused; }
+.vitrina[data-quieta] .vitrina-puntos button[aria-current="true"] i::after { animation: none; transform: scaleX(1); }
+@keyframes cuenta { to { transform: scaleX(1); } }
+
+/* coches: foto 16:9 (recortada, sin textos) y transición de la tarjeta a la ficha */
+.tarjeta-foto, .galeria-principal, .galeria-miniaturas button { aspect-ratio: 16 / 9; }
+.tarjeta { transition: transform 0.45s var(--suave-anim), box-shadow 0.45s var(--suave-anim), border-color 0.3s; }
+.tarjeta:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -24px rgba(43,125,233,0.45); }
+.tarjeta-foto::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.14) 48%, transparent 60%); transform: translateX(-120%); pointer-events: none; }
+.tarjeta:hover .tarjeta-foto::after { transition: transform 0.9s var(--suave-anim); transform: translateX(120%); }
+::view-transition-group(*) { animation-duration: 0.5s; animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+/* servicios: iconos de línea en vez de fotos */
+.icono-servicio { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; color: var(--azul-claro); background: radial-gradient(circle at 30% 30%, rgba(143,208,255,0.16), rgba(43,125,233,0.06)); border: 1px solid rgba(143,208,255,0.22); transition: transform 0.6s var(--suave-anim), border-color 0.3s; }
+.icono-servicio svg { width: 26px; height: 26px; }
+.servicio:hover .icono-servicio { transform: rotate(-8deg) scale(1.06); border-color: var(--azul-claro); }
+
+/* propuesta: informe de entrega */
+.informe { background: linear-gradient(180deg, var(--superficie-2), var(--superficie)); border: 1px solid var(--linea); border-radius: 12px; padding: 26px; display: grid; gap: 18px; box-shadow: 0 30px 60px -30px rgba(0,0,0,0.8); }
+.informe-cabeza { display: flex; align-items: center; gap: 14px; }
+.informe-cabeza img { width: 46px; height: auto; }
+.informe-cabeza small { display: block; font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--azul-claro); }
+.informe-cabeza b { font-family: var(--titular); font-weight: 600; }
+.informe ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.informe li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--linea); color: var(--suave); }
+.informe li svg { width: 22px; height: 22px; flex: none; color: #4ade80; }
+.informe .trazo { stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke-dashoffset 0.5s var(--suave-anim); }
+.informe.visto .trazo, html:not(.con-js) .informe .trazo { stroke-dashoffset: 0; }
+.informe.visto li:nth-child(2) .trazo { transition-delay: 0.25s; } .informe.visto li:nth-child(3) .trazo { transition-delay: 0.5s; } .informe.visto li:nth-child(4) .trazo { transition-delay: 0.75s; } .informe.visto li:nth-child(5) .trazo { transition-delay: 1s; }
+.informe-barra { height: 4px; background: var(--linea); border-radius: 4px; overflow: hidden; }
+.informe-barra i { display: block; height: 100%; background: linear-gradient(90deg, var(--azul), #4ade80); transform: scaleX(0); transform-origin: left; transition: transform 1.5s 0.2s var(--suave-anim); }
+.informe.visto .informe-barra i, html:not(.con-js) .informe-barra i { transform: scaleX(1); }
+.informe-pie { margin: 0; display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--tenue); }
+.informe-pie b { color: #4ade80; font-weight: 600; }
+
+/* importación: ruta animada en vez de foto */
+.llamada { isolation: isolate; background: radial-gradient(700px 360px at 20% 80%, rgba(43,125,233,0.22), transparent 70%), linear-gradient(160deg, #0b1220, #07090d 70%); }
+.llamada .fondo { display: none; }
+.ruta { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.55; }
+.llamada .envoltorio::before { content: ""; position: absolute; inset: 10% 15%; z-index: -1; background: radial-gradient(closest-side, rgba(7,9,13,0.85), transparent); }
+.ruta-linea { stroke: rgba(143,208,255,0.45); stroke-width: 1.4; stroke-dasharray: 6 8; animation: ruta 2.4s linear infinite; }
+@keyframes ruta { to { stroke-dashoffset: -28; } }
+.ruta-puntos circle { fill: var(--azul-claro); opacity: 0.8; }
+.ruta .destino { fill: var(--azul); transform-box: fill-box; transform-origin: center; animation: late 2s ease-in-out infinite; }
+@keyframes late { 50% { transform: scale(1.6); opacity: 0.6; } }
+.ruta text { fill: rgba(238,242,247,0.55); font: 500 9px var(--letra); letter-spacing: 0.14em; text-transform: uppercase; }
+@media (max-width: 720px) { .ruta { opacity: 0.35; } .ruta text { display: none; } }
+.hero.interior.sin-foto { background: radial-gradient(800px 400px at 85% 30%, rgba(43,125,233,0.2), transparent 70%), linear-gradient(180deg, #0b1220, var(--fondo)); }
+
+/* nosotros: placa del concesionario */
+.placa-concesionario { text-align: center; padding: 36px 28px; border: 1px solid var(--linea); border-radius: 14px; background: radial-gradient(500px 260px at 50% 0%, rgba(43,125,233,0.16), transparent 70%), var(--superficie); display: grid; gap: 16px; justify-items: center; }
+.nosotros .placa-concesionario img { width: 150px; height: auto; aspect-ratio: auto; border-radius: 0; object-fit: contain; filter: drop-shadow(0 8px 24px rgba(43,125,233,0.35)); }
+.placa-concesionario .lema { margin: 0; color: var(--cromo); font-family: var(--titular); font-stretch: 112%; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.85rem; }
+.placa-concesionario dl { margin: 0; width: 100%; display: grid; text-align: left; }
+.placa-concesionario dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid var(--linea); }
+.placa-concesionario dt { color: var(--tenue); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; }
+.placa-concesionario dd { margin: 0; text-align: right; color: var(--texto-claro); }
+
+/* vende: pasos de la tasación */
+.tasacion-pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: paso; }
+.tasacion-pasos li { counter-increment: paso; position: relative; padding: 18px 18px 18px 64px; border: 1px solid var(--linea); border-radius: 10px; background: var(--superficie); display: grid; gap: 4px; }
+.tasacion-pasos li::before { content: counter(paso, decimal-leading-zero); position: absolute; left: 18px; top: 18px; font: 600 1.1rem var(--titular); font-stretch: 112%; color: var(--azul-claro); }
+.tasacion-pasos span { color: var(--suave); font-size: 0.92rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .vitrina-coche, .vitrina-datos { transition: none; }
+  .informe .trazo { stroke-dashoffset: 0; } .informe-barra i { transform: scaleX(1); }
+  .vitrina-puntos button[aria-current="true"] i::after { transform: scaleX(1); }
+}

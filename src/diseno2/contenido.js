@@ -1,5 +1,6 @@
 // Textos de la web de LACAR Automóviles, tomados de su web de Arbicars (portada, servicios, preguntas frecuentes…).
 // Las fotos de /img-web/ se cambian desde el panel (Imágenes de la web); las de /img/servicios/ son fijas.
+// Propuesta v2: los servicios se pintan con su icono (trazo fino) en vez de foto; la foto queda por si se vuelve a usar.
 // Pendiente de que lo confirme el dueño (venía así en su web de Arbicars): la inspección de 80 puntos, el informe
 // Carfax, la «garantía oficial de 12 meses en motor» y que la garantía «se gestiona directamente con el fabricante».
 import { NEGOCIO } from '../negocio.js';
@@ -46,12 +47,12 @@ export const PORTADA = {
 };
 
 export const SERVICIOS = [
-  { titulo: 'Financiación', texto: 'Planes a medida con condiciones claras y sin costes ocultos.', foto: '/img-web/financiacion.webp', enlace: '/finance' },
-  { titulo: 'Gestión de venta', texto: 'Nos encargamos de todo el proceso, desde la tasación hasta la entrega al comprador.', foto: '/img-web/acompanamiento.webp', enlace: '/sell-your-car' },
-  { titulo: 'Matriculación en España', texto: 'Tramitamos la documentación y la matriculación de forma rápida y sin complicaciones.', foto: '/img/servicios/matriculacion.webp', enlace: '/custom-order' },
-  { titulo: 'Garantía', texto: 'Cobertura completa que protege tu inversión durante el tiempo que necesites.', foto: '/img-web/taller.webp' },
-  { titulo: 'Importación', texto: 'Traemos el modelo que deseas desde el extranjero con gestión integral.', foto: '/img-web/importacion.webp', enlace: '/custom-order' },
-  { titulo: 'Coches a la carta', texto: 'Personalizamos el vehículo según tus especificaciones antes de la entrega.', foto: '/img/servicios/a-la-carta.webp', enlace: '/custom-order' },
+  { titulo: 'Financiación', texto: 'Planes a medida con condiciones claras y sin costes ocultos.', foto: '/img-web/financiacion.webp', enlace: '/finance', icono: 'M3 6h18v12H3z M3 10h18 M7 15h4' },
+  { titulo: 'Gestión de venta', texto: 'Nos encargamos de todo el proceso, desde la tasación hasta la entrega al comprador.', foto: '/img-web/acompanamiento.webp', enlace: '/sell-your-car', icono: 'M20 13 13 20 4 11V4h7l9 9Z M8.5 8.5h.01' },
+  { titulo: 'Matriculación en España', texto: 'Tramitamos la documentación y la matriculación de forma rápida y sin complicaciones.', foto: '/img/servicios/matriculacion.webp', enlace: '/custom-order', icono: 'M2 8h20v8H2z M5 12h2 M10 12h9' },
+  { titulo: 'Garantía', texto: 'Cobertura completa que protege tu inversión durante el tiempo que necesites.', foto: '/img-web/taller.webp', icono: 'M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z M9 12l2 2 4-4' },
+  { titulo: 'Importación', texto: 'Traemos el modelo que deseas desde el extranjero con gestión integral.', foto: '/img-web/importacion.webp', enlace: '/custom-order', icono: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z M3 12h18 M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9 M12 3C9.5 5.6 8.2 8.6 8.2 12s1.3 6.4 3.8 9' },
+  { titulo: 'Coches a la carta', texto: 'Personalizamos el vehículo según tus especificaciones antes de la entrega.', foto: '/img/servicios/a-la-carta.webp', enlace: '/custom-order', icono: 'M4 6h9 M17 6h3 M4 12h3 M11 12h9 M4 18h11 M19 18h1 M15 4v4 M9 10v4 M17 16v4' },
 ];
 
 /** Preguntas de la portada. */
