@@ -481,6 +481,9 @@ h3 { font-weight: 600; font-stretch: 104%; letter-spacing: -0.01em; }
 .nav a, .cabecera .tel { white-space: nowrap; }
 @media (max-width: 1440px) { .nav a { padding: 10px 9px; letter-spacing: 0.1em; } }
 .logo .marca b { color: var(--cromo); font-weight: 500; }
+/* En escritorio el menú completo no deja sitio a «LACAR AUTOMÓVILES»: queda «LACAR» junto al escudo y el logo no se encoge. */
+.cabecera .logo { flex: none; }
+@media (min-width: 1000px) { .cabecera .logo .marca b { display: none; } }
 
 /* portada: showroom */
 .hero.showroom { background: radial-gradient(900px 520px at 72% 62%, rgba(43,125,233,0.22), transparent 65%), radial-gradient(700px 300px at 70% 100%, rgba(143,208,255,0.10), transparent 70%), linear-gradient(180deg, #05070b, var(--fondo)); min-height: min(100svh, 920px); }
